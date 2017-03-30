@@ -40,7 +40,7 @@ task createDockerfile(type: Dockerfile, overwrite:true){
   from "${project.dockerNamespaceUrl}${project.ext.baseImage}:${project.dockerAppTag}"
   maintainer "DigitalGlobe-RadiantBlue"
 
-  runCommand "yum -y ossim ossim-kakadu-plugin ossim-jpeg12-plugin ossim-sqlite-plugin ossim-geopdf-plugin ossim-png-plugin ossim-gdal-plugin&& yum clean all"
+  runCommand "yum -y install ossim ossim-kakadu-plugin ossim-jpeg12-plugin ossim-sqlite-plugin ossim-geopdf-plugin ossim-png-plugin ossim-gdal-plugin&& yum clean all"
 }
 
 task buildDockerImage(type: DockerBuildImage, dependsOn: createDockerfile, overwrite:true) {
