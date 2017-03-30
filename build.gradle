@@ -7,7 +7,7 @@ import com.bmuschko.gradle.docker.tasks.image.DockerRemoveImage
 buildscript {
   ext {
     grailsVersion = ""
-    baseImage = "o2-base"
+    baseImage = "o2-ossim"
     if(System.env.OMAR_COMMON_PROPERTIES)
     {
       apply from: System.env.OMAR_COMMON_PROPERTIES
