@@ -38,9 +38,8 @@ task createDockerfile(type: Dockerfile, overwrite:true){
   destFile = project.file('docker/Dockerfile')
   from "project.ext.baseImage:${dockerAppTag}"
   maintainer "DigitalGlobe-RadiantBlue"
-  runCommand "yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm java-1.8.0-openjdk haveged unzip && yum clean all"
-  addFile "epel.repo", "/etc/yum.repos.d/epel.repo"
-  addFile "ossim-${project.ext.yumTag}.repo", "/etc/yum.repos.d/ossim.repo"
+
+  runCommand "yum -y ossim ossim-kakadu-plugin ossim-jpeg12-plugin ossim-sqlite-plugin ossim-geopdf-plugin ossim-png-plugin ossim-gdal-plugin&& yum clean all"
 }
 
 task buildDockerImage(type: DockerBuildImage, dependsOn: createDockerfile, overwrite:true) {
