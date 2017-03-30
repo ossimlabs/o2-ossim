@@ -1,1 +1,1 @@
-# o2-base
+# o2-ossim
