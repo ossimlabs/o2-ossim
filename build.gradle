@@ -1,0 +1,92 @@
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerTagImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+import com.bmuschko.gradle.docker.tasks.image.DockerRemoveImage
+
+buildscript {
+  ext {
+    grailsVersion = ""
+    baseImage = "o2-base"
+    if(System.env.OMAR_COMMON_PROPERTIES)
+    {
+      apply from: System.env.OMAR_COMMON_PROPERTIES
+    }
+  }
+  repositories {
+    mavenLocal()
+    maven { url "${ossimMavenProxy}" }
+  }
+  dependencies {
+        classpath 'com.bmuschko:gradle-docker-plugin:3.0.6'
+        classpath 'com.github.skhatri:gradle-s3-plugin:1.0.4'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:latest.release"
+  }
+}
+apply plugin: "eclipse"
+apply plugin: "idea"
+apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
+apply plugin: com.github.skhatri.s3aws.plugin.S3Plugin
+apply plugin: org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
+
+apply plugin: "java"
+apply plugin: "maven-publish"
+
+
+
+task createDockerfile(type: Dockerfile, overwrite:true){
+  destFile = project.file('docker/Dockerfile')
+  from "project.ext.baseImage:${dockerAppTag}"
+  maintainer "DigitalGlobe-RadiantBlue"
+  runCommand "yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm java-1.8.0-openjdk haveged unzip && yum clean all"
+  addFile "epel.repo", "/etc/yum.repos.d/epel.repo"
+  addFile "ossim-${project.ext.yumTag}.repo", "/etc/yum.repos.d/ossim.repo"
+}
+
+task buildDockerImage(type: DockerBuildImage, dependsOn: createDockerfile, overwrite:true) {
+    inputDir = createDockerfile.destFile.parentFile
+    tag = "${image}"
+}
+task tagDockerImage(type: DockerTagImage, dependsOn: buildDockerImage, overwrite:true) {
+  imageId "${image}"
+  tag "${dockerAppTag}"
+  repository  "${dockerNamespaceUrl}${project.name}"
+}
+
+task pushDockerImage(type: DockerPushImage, overwrite:true){
+
+  dependsOn tagDockerImage
+  dependsOn logIn 
+  
+  imageName "${dockerNamespaceUrl}${image}"
+}
+
+task saveDockerImage(dependsOn: pushDockerImage, overwrite:true) {
+  doLast {
+    exec {
+      commandLine 'docker', 'save', image, '-o', "${project.name}.tgz"
+    }
+  }
+}
+
+// Uses the S3 plugin to push the .tgz file to the ossimlabs
+task dockerImageToS3(type: com.github.skhatri.s3aws.plugin.S3UploadTask, dependsOn: saveDockerImage, overwrite:true) {
+  bucket = 'o2-delivery/dev/docker'
+  key = "${imageTgz}"
+  file = project.file("${imageTgz}").toString()
+}
+
+task doAll(dependsOn: dockerImageToS3, overwrite:true) {
+  doLast{
+    exec {
+      // Removes the image that is pushed to the remote repository
+      // from the local Docker registry
+      commandLine 'docker', 'rmi', "-f", "${dockerNamespaceUrl}${image}"
+    }
+    exec {
+      // Removes the default image created during the build process from
+      // from the local Docker registry
+      commandLine 'docker', 'rmi', "-f", image
+    }
+  }
+}
