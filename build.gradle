@@ -43,9 +43,11 @@ task createDockerfile(type: Dockerfile, overwrite:true){
   runCommand "yum -y install ossim ossim-kakadu-plugin ossim-jpeg12-plugin ossim-sqlite-plugin ossim-geopdf-plugin ossim-png-plugin ossim-gdal-plugin&& yum clean all"
 }
 
-task buildDockerImage(type: DockerBuildImage, dependsOn: createDockerfile, overwrite:true) {
-    inputDir = createDockerfile.destFile.parentFile
-    tag = "${image}"
+task buildDockerImage(type: DockerBuildImage, overwrite:true) {
+  dependsOn createDockerfile
+  dependsOn logIn 
+  inputDir = createDockerfile.destFile.parentFile
+  tag = "${image}"
 }
 task tagDockerImage(type: DockerTagImage, dependsOn: buildDockerImage, overwrite:true) {
   imageId "${image}"
@@ -56,7 +58,6 @@ task tagDockerImage(type: DockerTagImage, dependsOn: buildDockerImage, overwrite
 task pushDockerImage(type: DockerPushImage, overwrite:true){
 
   dependsOn tagDockerImage
-  dependsOn logIn 
   
   imageName "${dockerNamespaceUrl}${image}"
 }
