@@ -72,12 +72,29 @@ task saveDockerImage(dependsOn: pushDockerImage, overwrite:true) {
 
 // Uses the S3 plugin to push the .tgz file to the ossimlabs
 task dockerImageToS3(type: com.github.skhatri.s3aws.plugin.S3UploadTask, dependsOn: saveDockerImage, overwrite:true) {
-  bucket = 'o2-delivery/dev/docker'
+  bucket = "o2-delivery/${gitBranch}/docker"
   key = "${imageTgz}"
-  file = project.file("${imageTgz}").toString()
+  file = project.file("build/libs/${imageTgz}").toString()
 }
 
-task doAll(dependsOn: dockerImageToS3, overwrite:true) {
+task dockerFileToS3(type: com.github.skhatri.s3aws.plugin.S3UploadTask, dependsOn: createDockerfile, overwrite:true) {
+  bucket = "o2-delivery/${gitBranch}/docker"
+  key = "${project.name}-Dockerfile"
+  file = createDockerfile.destFile.toString()
+}
+
+task jarFileToS3(type: com.github.skhatri.s3aws.plugin.S3UploadTask, overwrite:true) {
+  def jarName = "${project.name}-${buildVersion}-${buildVersionTag}.jar"
+
+  bucket = "o2-delivery/${gitBranch}/jars"
+  key = "${jarName}"
+  file = "build/libs/${jarName}"
+}
+
+task doAll(overwrite:true) {
+  dependsOn jarFileToS3
+  dependsOn dockerImageToS3
+  dependsOn dockerFileToS3
   doLast{
     exec {
       // Removes the image that is pushed to the remote repository
