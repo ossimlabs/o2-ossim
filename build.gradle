@@ -32,6 +32,20 @@ apply plugin: org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 apply plugin: "java"
 apply plugin: "maven-publish"
 
+def getCurrentGitBranch() {
+    def gitBranch = "Unknown branch"
+    try {
+        def workingDir = new File("${project.projectDir}")
+        def result = 'git rev-parse --abbrev-ref HEAD'.execute(null, workingDir)
+        result.waitFor()
+        if (result.exitValue() == 0) {
+            gitBranch = result.text.trim()
+        }
+    } catch (e) {
+    }
+    return gitBranch
+}
+
 def gitBranch=getCurrentGitBranch()
 
 
