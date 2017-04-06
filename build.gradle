@@ -50,7 +50,7 @@ def gitBranch=getCurrentGitBranch()
 
 
 task createDockerfile(type: Dockerfile, overwrite:true){
-  destFile = project.file('docker/Dockerfile')
+  destFile = project.file('build/libs/Dockerfile')
 
   from "${project.dockerNamespaceUrl}${project.ext.baseImage}:${project.dockerAppTag}"
   maintainer "DigitalGlobe-RadiantBlue"
