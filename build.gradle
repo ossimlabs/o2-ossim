@@ -9,6 +9,7 @@ buildscript {
     grailsVersion = ""
     baseImage = "omar-base"
     dockerFile = project.file("docker/Dockerfile")
+    hasJar=false
      dockerStatementsOverride = {
        [
           "FROM ${project.dockerNamespaceUrl}${project.ext.baseImage}:${project.dockerAppTag}",
