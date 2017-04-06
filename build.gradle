@@ -8,6 +8,14 @@ buildscript {
   ext {
     grailsVersion = ""
     baseImage = "omar-base"
+     dockerStatementsOverride = {
+       [
+          "FROM ${project.dockerNamespaceUrl}${project.ext.baseImage}:${project.dockerAppTag}",
+
+          "MAINTAINER RadiantBlue Technologies radiantblue.com",
+          "RUN yum -y install ossim ossim-kakadu-plugin ossim-jpeg12-plugin ossim-sqlite-plugin ossim-geopdf-plugin ossim-png-plugin ossim-gdal-plugin&& yum clean all"
+       ]
+     }
     if(System.env.OMAR_COMMON_PROPERTIES)
     {
       apply from: System.env.OMAR_COMMON_PROPERTIES
@@ -32,94 +40,3 @@ apply plugin: org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 apply plugin: "java"
 apply plugin: "maven-publish"
 
-def getCurrentGitBranch() {
-    def gitBranch = "Unknown branch"
-    try {
-        def workingDir = new File("${project.projectDir}")
-        def result = 'git rev-parse --abbrev-ref HEAD'.execute(null, workingDir)
-        result.waitFor()
-        if (result.exitValue() == 0) {
-            gitBranch = result.text.trim()
-        }
-    } catch (e) {
-    }
-    return gitBranch
-}
-
-def gitBranch=getCurrentGitBranch()
-
-
-task createDockerfile(type: Dockerfile, overwrite:true){
-  destFile = project.file('build/libs/Dockerfile')
-
-  from "${project.dockerNamespaceUrl}${project.ext.baseImage}:${project.dockerAppTag}"
-  maintainer "DigitalGlobe-RadiantBlue"
-
-  runCommand "yum -y install ossim ossim-kakadu-plugin ossim-jpeg12-plugin ossim-sqlite-plugin ossim-geopdf-plugin ossim-png-plugin ossim-gdal-plugin&& yum clean all"
-}
-
-task buildDockerImage(type: DockerBuildImage, overwrite:true) {
-  dependsOn createDockerfile
-  dependsOn logIn 
-  inputDir = createDockerfile.destFile.parentFile
-  tag = "${image}"
-}
-task tagDockerImage(type: DockerTagImage, dependsOn: buildDockerImage, overwrite:true) {
-  imageId "${image}"
-  tag "${dockerAppTag}"
-  repository  "${dockerNamespaceUrl}${project.name}"
-}
-
-task pushDockerImage(type: DockerPushImage, overwrite:true){
-
-  dependsOn tagDockerImage
-  
-  imageName "${dockerNamespaceUrl}${image}"
-}
-
-task saveDockerImage(dependsOn: pushDockerImage, overwrite:true) {
-  doLast {
-    exec {
-      commandLine 'docker', 'save', image, '-o', "${project.name}.tgz"
-    }
-  }
-}
-
-// Uses the S3 plugin to push the .tgz file to the ossimlabs
-task dockerImageToS3(type: com.github.skhatri.s3aws.plugin.S3UploadTask, dependsOn: saveDockerImage, overwrite:true) {
-  bucket = "o2-delivery/${gitBranch}/docker"
-  key = "${imageTgz}"
-  file = project.file("build/libs/${imageTgz}").toString()
-}
-
-task dockerFileToS3(type: com.github.skhatri.s3aws.plugin.S3UploadTask, dependsOn: createDockerfile, overwrite:true) {
-  bucket = "o2-delivery/${gitBranch}/docker"
-  key = "${project.name}-Dockerfile"
-  file = createDockerfile.destFile.toString()
-}
-
-task jarFileToS3(type: com.github.skhatri.s3aws.plugin.S3UploadTask, overwrite:true) {
-  def jarName = "${project.name}-${buildVersion}-${buildVersionTag}.jar"
-
-  bucket = "o2-delivery/${gitBranch}/jars"
-  key = "${jarName}"
-  file = "build/libs/${jarName}"
-}
-
-task doAll(overwrite:true) {
-  dependsOn jarFileToS3
-  dependsOn dockerImageToS3
-  dependsOn dockerFileToS3
-  doLast{
-    exec {
-      // Removes the image that is pushed to the remote repository
-      // from the local Docker registry
-      commandLine 'docker', 'rmi', "-f", "${dockerNamespaceUrl}${image}"
-    }
-    exec {
-      // Removes the default image created during the build process from
-      // from the local Docker registry
-      commandLine 'docker', 'rmi', "-f", image
-    }
-  }
-}
