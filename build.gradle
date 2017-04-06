@@ -33,10 +33,6 @@ buildscript {
 }
 apply plugin: "eclipse"
 apply plugin: "idea"
-apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
-apply plugin: com.github.skhatri.s3aws.plugin.S3Plugin
-apply plugin: org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
-
-apply plugin: "java"
 apply plugin: "maven-publish"
+apply plugin: "maven"
 
