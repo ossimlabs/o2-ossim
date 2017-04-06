@@ -9,7 +9,8 @@ buildscript {
     grailsVersion = ""
     baseImage = "omar-base"
     dockerFile = project.file("docker/Dockerfile")
-    hasJar=false
+    // must be a closure.  If set to =false then it thinks the proeprty does not exist
+    hasJar={false}
      dockerStatementsOverride = {
        [
           "FROM ${project.dockerNamespaceUrl}${project.ext.baseImage}:${project.dockerAppTag}",
