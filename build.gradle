@@ -29,9 +29,6 @@ buildscript {
     maven { url "${ossimMavenProxy}" }
   }
   dependencies {
-        classpath 'com.bmuschko:gradle-docker-plugin:3.0.6'
-        classpath 'com.github.skhatri:gradle-s3-plugin:1.0.4'
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:latest.release"
   }
 }
 apply plugin: "eclipse"
