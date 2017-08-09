@@ -10,11 +10,13 @@ buildscript {
           "FROM ${project.dockerNamespaceUrl}${project.ext.baseImage}:${project.dockerAppTag}",
 
           "MAINTAINER RadiantBlue Technologies radiantblue.com",
+	  "USER root",
           """RUN yum -y install fuse curl ossim ossim-kakadu-plugin \
           ossim-web-plugin ossim-jpeg12-plugin ossim-sqlite-plugin \
           ossim-geopdf-plugin ossim-png-plugin ossim-gdal-plugin \
           ossim-aws-plugin&& yum clean all
-          """
+          """,
+	  "USER 1001"
        ]
      }
     if(System.env.OMAR_COMMON_PROPERTIES)
