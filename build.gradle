@@ -9,12 +9,11 @@ buildscript {
        [
           "FROM ${project.dockerNamespaceUrl}${project.ext.baseImage}:${project.dockerAppTag}",
 	  "USER root",
-     "ADD ./opencv-3.2-minimal-install.tgz /usr",
+//     "ADD ./opencv-3.2-minimal-install.tgz /usr",
 	  """RUN yum -y install fuse curl jsoncpp ossim ossim-kakadu-plugin \
     ossim-web-plugin ossim-jpeg12-plugin ossim-sqlite-plugin \
     ossim-geopdf-plugin ossim-png-plugin ossim-gdal-plugin \
-    ossim-aws-plugin && yum clean all && \
-    yumdownloader ossim-atp-plugin;rpm --nodeps -iv ossim-atp-plugin*.rpm;rm -f ossim-atp-plugin*.rpm
+    ossim-aws-plugin && yum clean all
     """,
 	  "USER 1001"
        ]
