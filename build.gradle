@@ -13,8 +13,9 @@ buildscript {
 	  """RUN yum -y install fuse curl jsoncpp ossim ossim-kakadu-plugin \
     ossim-web-plugin ossim-jpeg12-plugin ossim-sqlite-plugin \
     ossim-geopdf-plugin ossim-png-plugin ossim-gdal-plugin \
-    ossim-aws-plugin && yumdownloader ossim-atp-plugin;rpm --nodeps -iv ossim-atp-plugin*.rpm;rm -f ossim-atp-plugin*.rpm && \
-    yum clean all""",
+    ossim-aws-plugin && yum clean all && \
+    yumdownloader ossim-atp-plugin;rpm --nodeps -iv ossim-atp-plugin*.rpm;rm -f ossim-atp-plugin*.rpm
+    """,
 	  "USER 1001"
        ]
      }
