@@ -38,13 +38,13 @@ node(""){
                    flatten: true])
             sh "tar xvfz ossim-ci-${OSSIM_GIT_BRANCH}.tgz"
             notifyObj = load "${env.WORKSPACE}/ossim-ci/jenkins/pipeline/notify.groovy"
-             step ([$class: 'CopyArtifact',
-                projectName: "opencv-build",
-                filter: "*.tgz",
-                flatten: true,
-                target: "${env.WORKSPACE}/docker/"])
 
          }
+         step ([$class: 'CopyArtifact',
+            projectName: "opencv-build",
+            filter: "*.tgz",
+            flatten: true,
+            target: "${env.WORKSPACE}/docker/g"])
      }
 
     try {
