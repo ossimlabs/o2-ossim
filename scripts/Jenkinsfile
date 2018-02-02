@@ -45,7 +45,7 @@ node(""){
                   projectName: "opencv-build",
                   filter: "*.tgz",
                   flatten: true,
-                  target: ""])
+                  target: "${env.WORKSPACE}/docker"])
          }
      }
 
