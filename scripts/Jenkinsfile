@@ -40,12 +40,12 @@ node(""){
             notifyObj = load "${env.WORKSPACE}/ossim-ci/jenkins/pipeline/notify.groovy"
 
          }
-         dir("${env.WORKSPACE}/docker"){
+         dir("${env.WORKSPACE}/omar-ossim-base/docker"){
            step ([$class: 'CopyArtifact',
                   projectName: "opencv-build",
                   filter: "*.tgz",
                   flatten: true,
-                  target: "${env.WORKSPACE}/docker"])
+                  target: "${env.WORKSPACE}/omar-ossim-base/docker"])
          }
      }
 
