@@ -41,10 +41,10 @@ node(""){
 
          }
          step ([$class: 'CopyArtifact',
-            projectName: "opencv-build",
-            filter: "*.tgz",
-            flatten: true,
-            target: "${env.WORKSPACE}/docker/g"])
+                projectName: "opencv-build",
+                filter: "*.tgz",
+                flatten: true,
+                target: "${env.WORKSPACE}/docker/"])
      }
 
     try {
