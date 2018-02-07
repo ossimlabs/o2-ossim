@@ -12,7 +12,7 @@ buildscript {
 //     "ADD ./opencv-3.2-minimal-install.tgz /usr",
 	  """RUN yum -y install fuse curl jsoncpp ossim ossim-kakadu-plugin \
     ossim-web-plugin ossim-jpeg12-plugin ossim-sqlite-plugin \
-    ossim-geopdf-plugin ossim-png-plugin ossim-gdal-plugin \
+    ossim-geopdf-plugin ossim-png-plugin ossim-gdal-plugin ossim-atp-plugin \
     ossim-aws-plugin && yum clean all""",
 	  "USER 1001"
        ]
