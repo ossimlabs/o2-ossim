@@ -23,8 +23,10 @@ buildscript {
     }
   }
   repositories {
-    mavenLocal()
     maven { url "${ossimMavenProxy}" }
+    if( Boolean.parseBoolean( System.env.WWW_CONNECTED ) ) {
+        mavenLocal()
+    }
   }
   dependencies {
   }
