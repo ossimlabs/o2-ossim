@@ -5,7 +5,7 @@ buildscript {
   }
   dependencies {
     classpath 'com.bmuschko:gradle-docker-plugin:3.0.12'
-    classpath 'io.ossim:gradleDefaults:1.5-SNAPSHOT'
+    classpath 'io.ossim:gradleDefaults:1.6-SNAPSHOT'
   }
 }
 
