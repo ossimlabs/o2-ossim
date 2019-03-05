@@ -34,10 +34,12 @@ node("${BUILD_NODE}"){
         } else {
             repoName = "ossim.repo_dev"
         }
+
         step ([$class: "CopyArtifact",
             projectName: "ossim-ci",
-            filter: "${repoName}",
-            target: "ossim.repo"])
+            filter: "${repoName}"])
+
+        sh "mv ${repoName} ossim.repo"
     }
 
     stage ("Publish Docker App")
