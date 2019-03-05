@@ -26,6 +26,20 @@ node("${BUILD_NODE}"){
         load "common-variables.groovy"
     }
 
+    stage("Pull Artifacts")
+    {
+        String repoName
+        if ("${BRANCH_NAME}" == "master") {
+            repoName = "ossim.repo_master"
+        } else {
+            repoName = "ossim.repo_dev"
+        }
+        step ([$class: "CopyArtifact",
+            projectName: "ossim-ci",
+            filter: "${repoName}",
+            target: "ossim.repo"])
+    }
+
     stage ("Publish Docker App")
     {
         withCredentials([[$class: 'UsernamePasswordMultiBinding',
