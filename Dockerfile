@@ -1,7 +1,7 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 USER root
-ENV OSSIM_PREFS-FILE=/usr/share/ossim/ossim-site-preferences \
+ENV OSSIM_PREFS_FILE=/usr/share/ossim/ossim-site-preferences \
     OSSIM_INSTALL_PREFIX=/usr \
     OSSIM_DATA=/data
 ADD ossim.repo /etc/yum.repos.d/
