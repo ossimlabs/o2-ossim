@@ -17,18 +17,6 @@ node("${BUILD_NODE}"){
         checkout(scm)
     }
 
-    stage("Load Variables")
-    {
-        withCredentials([string(credentialsId: 'o2-artifact-project', variable: 'o2ArtifactProject')]) {
-            step ([$class: "CopyArtifact",
-                projectName: o2ArtifactProject,
-                filter: "common-variables.groovy",
-                flatten: true])
-        }
-
-        load "common-variables.groovy"
-    }
-
     stage("Pull Artifacts")
     {
         String repoName
@@ -38,9 +26,18 @@ node("${BUILD_NODE}"){
             repoName = "ossim.repo_dev"
         }
 
-        step ([$class: "CopyArtifact",
-            projectName: "ossim-ci",
-            filter: "${repoName}"])
+        withCredentials([string(credentialsId: 'o2-artifact-project', variable: 'o2ArtifactProject')]) {
+            step ([$class: "CopyArtifact",
+                projectName: o2ArtifactProject,
+                filter: "common-variables.groovy",
+                flatten: true])
+
+            step ([$class: "CopyArtifact",
+                projectName: o2ArtifactProject,
+                filter: "${repoName}"])
+        }
+
+        load "common-variables.groovy"
 
         sh "mv ${repoName} ossim.repo"
     }
