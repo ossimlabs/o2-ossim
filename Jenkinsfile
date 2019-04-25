@@ -11,55 +11,79 @@ properties([
 ])
 
 node("${BUILD_NODE}"){
-
-    stage("Checkout branch $BRANCH_NAME")
-    {
-        checkout(scm)
-    }
-
-    stage("Pull Artifacts")
-    {
-        String repoName
-        if ("${BRANCH_NAME}" == "master") {
-            repoName = "ossim.repo_master"
-        } else {
-            repoName = "ossim.repo_dev"
-        }
-
-        withCredentials([string(credentialsId: 'o2-artifact-project', variable: 'o2ArtifactProject')]) {
-            step ([$class: "CopyArtifact",
-                projectName: o2ArtifactProject,
-                filter: "common-variables.groovy",
-                flatten: true])
-
-            step ([$class: "CopyArtifact",
-                projectName: o2ArtifactProject,
-                filter: "${repoName}"])
-        }
-
-        load "common-variables.groovy"
-
-        sh "mv ${repoName} ossim.repo"
-    }
-
-    stage ("Publish Docker App")
-    {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding',
-                        credentialsId: 'dockerCredentials',
-                        usernameVariable: 'DOCKER_REGISTRY_USERNAME',
-                        passwordVariable: 'DOCKER_REGISTRY_PASSWORD']])
+    try {
+        stage("Checkout branch $BRANCH_NAME")
         {
-            // Run all tasks on the app. This includes pushing to OpenShift and S3.
-            sh """
-            gradle pushDockerImage \
-                -PossimMavenProxy=${OSSIM_MAVEN_PROXY}
-            """
+            checkout(scm)
         }
-    }
+
+        stage("Pull Artifacts")
+        {
+            String repoName
+            if ("${BRANCH_NAME}" == "master") {
+                repoName = "ossim.repo_master"
+            } else {
+                repoName = "ossim.repo_dev"
+            }
+
+            withCredentials([string(credentialsId: 'o2-artifact-project', variable: 'o2ArtifactProject')]) {
+                step ([$class: "CopyArtifact",
+                    projectName: o2ArtifactProject,
+                    filter: "common-variables.groovy",
+                    flatten: true])
+
+                step ([$class: "CopyArtifact",
+                    projectName: o2ArtifactProject,
+                    filter: "${repoName}"])
+            }
+
+            load "common-variables.groovy"
+
+            sh "mv ${repoName} ossim.repo"
+        }
+
+        stage ("Publish Docker App")
+        {
+            withCredentials([[$class: 'UsernamePasswordMultiBinding',
+                            credentialsId: 'dockerCredentials',
+                            usernameVariable: 'DOCKER_REGISTRY_USERNAME',
+                            passwordVariable: 'DOCKER_REGISTRY_PASSWORD']])
+            {
+                // Run all tasks on the app. This includes pushing to OpenShift and S3.
+                sh """
+                gradle pushDockerImage \
+                    -PossimMavenProxy=${OSSIM_MAVEN_PROXY}
+                """
+            }
+        }
         
-    stage("Clean Workspace")
-    {
-        if ("${CLEAN_WORKSPACE}" == "true")
-            step([$class: 'WsCleanup'])
+        stage ("Publish Latest Tagged Docker App")
+        {
+            withCredentials([[$class: 'UsernamePasswordMultiBinding',
+                            credentialsId: 'dockerCredentials',
+                            usernameVariable: 'DOCKER_REGISTRY_USERNAME',
+                            passwordVariable: 'DOCKER_REGISTRY_PASSWORD']])
+            {
+                // Tag to latest/release and push that too, to ensure the new changes get used by dependant apps
+                if ("$BRANCH_NAME" == "dev") {
+                    sh """
+                        gradle tagDockerImage pushDockerImage \
+                         -PdockerImageTag=latest
+                    """
+                } else if ("$BRANCH_NAME" == "master") {
+                    sh """
+                        gradle tagDockerImage pushDockerImage \
+                         -PdockerImageTag=release
+                    """
+                }
+            }
+        }
+
+    } finally {
+        stage("Clean Workspace")
+        {
+            if ("${CLEAN_WORKSPACE}" == "true")
+                step([$class: 'WsCleanup'])
+        }
     }
 }
