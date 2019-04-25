@@ -68,12 +68,14 @@ node("${BUILD_NODE}"){
                 if ("$BRANCH_NAME" == "dev") {
                     sh """
                         gradle tagDockerImage pushDockerImage \
-                         -PdockerImageTag=latest
+                         -PdockerImageTag=latest \
+                         -PossimMavenProxy=${OSSIM_MAVEN_PROXY}
                     """
                 } else if ("$BRANCH_NAME" == "master") {
                     sh """
                         gradle tagDockerImage pushDockerImage \
-                         -PdockerImageTag=release
+                         -PdockerImageTag=release \
+                         -PossimMavenProxy=${OSSIM_MAVEN_PROXY}
                     """
                 }
             }
