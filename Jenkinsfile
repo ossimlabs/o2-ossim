@@ -1,7 +1,8 @@
 properties([
     parameters ([
         string(name: 'BUILD_NODE', defaultValue: 'omar-build', description: 'The build node to run on'),
-        booleanParam(name: 'CLEAN_WORKSPACE', defaultValue: true, description: 'Clean the workspace at the end of the run')
+          string(name: 'ARTIFACT_TYPE', defaultValue: 'centos-7', description: 'type of artifact to pull from the sandbox'),
+       booleanParam(name: 'CLEAN_WORKSPACE', defaultValue: true, description: 'Clean the workspace at the end of the run')
     ]),
     pipelineTriggers([
             [$class: "GitHubPushTrigger"]
@@ -20,12 +21,12 @@ node("${BUILD_NODE}"){
 
         stage("Pull Artifacts")
         {
-            String repoName
-            if ("${BRANCH_NAME}" == "master") {
-                repoName = "ossim.repo_master"
-            } else {
-                repoName = "ossim.repo_dev"
-            }
+            // String repoName
+            // if ("${BRANCH_NAME}" == "master") {
+            //     repoName = "ossim.repo_master"
+            // } else {
+            //     repoName = "ossim.repo_dev"
+            // }
 
             withCredentials([string(credentialsId: 'o2-artifact-project', variable: 'o2ArtifactProject')]) {
                 step ([$class: "CopyArtifact",
@@ -36,11 +37,15 @@ node("${BUILD_NODE}"){
                 step ([$class: "CopyArtifact",
                     projectName: o2ArtifactProject,
                     filter: "${repoName}"])
-            }
+                step ([$class: "CopyArtifact",
+                    projectName: "ossim-sandbox-ossimbuild-multibranch/${BRANCH_NAME}",
+                    filter: "ossim-sandbox-${ARTIFACT_TYPE}-runtime.tgz",
+                    flatten: true])
+                 }
 
             load "common-variables.groovy"
 
-            sh "mv ${repoName} ossim.repo"
+            // sh "mv ${repoName} ossim.repo"
         }
 
         stage ("Publish Docker App")
