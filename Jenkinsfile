@@ -34,9 +34,9 @@ node("${BUILD_NODE}"){
                     filter: "common-variables.groovy",
                     flatten: true])
 
-                step ([$class: "CopyArtifact",
-                    projectName: o2ArtifactProject,
-                    filter: "${repoName}"])
+                // step ([$class: "CopyArtifact",
+                //     projectName: o2ArtifactProject,
+                //     filter: "${repoName}"])
                 step ([$class: "CopyArtifact",
                     projectName: "ossim-sandbox-ossimbuild-multibranch/${BRANCH_NAME}",
                     filter: "ossim-sandbox-${ARTIFACT_TYPE}-runtime.tgz",
