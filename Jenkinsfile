@@ -58,7 +58,7 @@ node("${BUILD_NODE}"){
                 // Run all tasks on the app. This includes pushing to OpenShift and S3.
                 sh """
                 gradle pushDockerImage \
-                    -PossimMavenProxy=${OSSIM_MAVEN_PROXY}
+                    -PossimMavenProxy=${MAVEN_DOWNLOAD_URL}
                 """
             }
         }
@@ -75,13 +75,13 @@ node("${BUILD_NODE}"){
                     sh """
                         gradle tagDockerImage pushDockerImage \
                          -PdockerImageTag=latest \
-                         -PossimMavenProxy=${OSSIM_MAVEN_PROXY}
+                         -PossimMavenProxy=${MAVEN_DOWNLOAD_URL}
                     """
                 } else if ("$BRANCH_NAME" == "master") {
                     sh """
                         gradle tagDockerImage pushDockerImage \
                          -PdockerImageTag=release \
-                         -PossimMavenProxy=${OSSIM_MAVEN_PROXY}
+                         -PossimMavenProxy=${MAVEN_DOWNLOAD_URL}
                     """
                 }
             }
