@@ -21,7 +21,7 @@ podTemplate(
       privileged: true
     ),
     containerTemplate(
-      image: "${DOCKER_REGISTRY_DOWNLOAD_URL}/omar-builder:latest",
+      image: "${DOCKER_REGISTRY_DOWNLOAD_URL}/ossim-builder-minimal-centos:1.0.0",
       name: 'builder',
       command: 'cat',
       ttyEnabled: true
