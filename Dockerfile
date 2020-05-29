@@ -1,4 +1,4 @@
-FROM nexus-docker-public-hosted.ossim.io/openjdk8:alpine-slim
+FROM nexus-docker-private-hosted.ossim.io/ossim-runtime-minimal-centos:dev
 
 USER root
 ENV OSSIM_PREFS_FILE=/usr/local/share/ossim/ossim-site-preferences \
