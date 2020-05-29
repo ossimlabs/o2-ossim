@@ -34,6 +34,7 @@ podTemplate(
     ),
   ]
 )
+{
 node(POD_LABEL){
     try {
         stage("Checkout branch $BRANCH_NAME")
@@ -95,19 +96,19 @@ node(POD_LABEL){
         }
         stage('Docker build') {
         container('docker') {
-            withDockerRegistry(credentialsId: 'dockerCredentials', url: "https://${DOCKER_REGISTRY_DOWNLOAD_URL}") {  //TODO
-            sh """
-                docker build -t "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-mensa-app:${BRANCH_NAME} ./docker
-            """
+                withDockerRegistry(credentialsId: 'dockerCredentials', url: "https://${DOCKER_REGISTRY_DOWNLOAD_URL}") {  //TODO
+                sh """
+                    docker build -t "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-mensa-app:${BRANCH_NAME} ./docker
+                """
+                }
             }
-        }
         stage('Docker push'){
             container('docker') {
-            withDockerRegistry(credentialsId: 'dockerCredentials', url: "https://${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}") {
-            sh """
-                docker push "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-mensa-app:${BRANCH_NAME}
-            """
-            }
+                withDockerRegistry(credentialsId: 'dockerCredentials', url: "https://${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}") {
+                sh """
+                    docker push "${DOCKER_REGISTRY_PUBLIC_UPLOAD_URL}"/omar-mensa-app:${BRANCH_NAME}
+                """
+                }
             }
         }
         }
@@ -119,4 +120,5 @@ node(POD_LABEL){
                 step([$class: 'WsCleanup'])
         }
     }
+}
 }
