@@ -1,4 +1,4 @@
-FROM nexus-docker-private-hosted.ossim.io/ossim-runtime-minimal-centos:dev
+FROM nexus-docker-public-hosted.ossim.io/omar-base:dev
 
 USER root
 ENV OSSIM_PREFS_FILE=/usr/local/share/ossim/ossim-site-preferences \
